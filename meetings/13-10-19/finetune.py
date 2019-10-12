@@ -55,7 +55,9 @@ model.layers[-2].trainable = True
 print(model.summary())
 print([layer.trainable for layer in model.layers])
 
-model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+model.compile(loss="categorical_crossentropy",
+              optimizer="adam",
+              metrics=["accuracy"])
 
 history = model.fit_generator(
     train_generator,

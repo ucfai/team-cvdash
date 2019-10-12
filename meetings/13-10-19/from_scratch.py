@@ -41,7 +41,9 @@ validation_generator = test_datagen.flow_from_directory(
     "data/test", target_size=input_shape[:-1], batch_size=batch_size
 )
 
-model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+model.compile(loss="categorical_crossentropy",
+              optimizer="adam",
+              metrics=["accuracy"])
 
 print(model.summary())
 
