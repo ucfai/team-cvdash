@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 num_classes = 4
 epochs = 3
-batch_size = 128
+batch_size = 32
 input_shape = (224, 224, 3)
 train_steps = 2000 // batch_size
 test_steps = 1000 // batch_size
