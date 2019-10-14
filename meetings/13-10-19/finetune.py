@@ -1,6 +1,6 @@
 import sys
 
-from tensorflow.keras.applications import ResNet50V2
+from tensorflow.keras.applications.resnet_v2 import ResNet50V2, preprocess_input
 from tensorflow.keras.layers import Activation, Dense
 from tensorflow.keras.models import Model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -17,7 +17,7 @@ except IndexError:
     data_augmentation = False
 
 # Setup generator
-if not data_augmentation:
+if data_augmentation:
     train_datagen = ImageDataGenerator(
         rescale=1.0/255,
         rotation_range=30,
@@ -25,12 +25,15 @@ if not data_augmentation:
         height_shift_range=0.2,
         shear_range=0.2,
         zoom_range=0.2,
-        horizontal_flip=True
+        horizontal_flip=True,
+        preprocessing_function=preprocess_input
     )
 else:
-    train_datagen = ImageDataGenerator(rescale=(1.0 / 255))
+    train_datagen = ImageDataGenerator(rescale=(1.0 / 255),
+                                       preprocessing_function=preprocess_input)
 
-test_datagen = ImageDataGenerator(rescale=(1.0 / 255))
+test_datagen = ImageDataGenerator(rescale=(1.0 / 255),
+                                  preprocessing_function=preprocess_input)
 
 train_generator = train_datagen.flow_from_directory(
     "data/train", target_size=input_shape[:-1], batch_size=batch_size
