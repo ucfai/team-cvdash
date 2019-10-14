@@ -19,7 +19,6 @@ except IndexError:
 # Setup generator
 if data_augmentation:
     train_datagen = ImageDataGenerator(
-        rescale=1.0/255,
         rotation_range=30,
         width_shift_range=0.2,
         height_shift_range=0.2,
@@ -29,11 +28,9 @@ if data_augmentation:
         preprocessing_function=preprocess_input
     )
 else:
-    train_datagen = ImageDataGenerator(rescale=(1.0 / 255),
-                                       preprocessing_function=preprocess_input)
+    train_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
-test_datagen = ImageDataGenerator(rescale=(1.0 / 255),
-                                  preprocessing_function=preprocess_input)
+test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
 train_generator = train_datagen.flow_from_directory(
     "data/train", target_size=input_shape[:-1], batch_size=batch_size

@@ -17,9 +17,8 @@ except IndexError:
 
 model = ResNet50V2(weights=None, classes=num_classes, input_shape=input_shape)
 
-if not data_augmentation:
+if data_augmentation:
     train_datagen = ImageDataGenerator(
-        rescale=1.0/255,
         rotation_range=30,
         width_shift_range=0.2,
         height_shift_range=0.2,
@@ -29,11 +28,9 @@ if not data_augmentation:
         preprocessing_function=preprocess_input
     )
 else:
-    train_datagen = ImageDataGenerator(rescale=(1.0 / 255),
-                                       preprocessing_function=preprocess_input)
+    train_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
-test_datagen = ImageDataGenerator(rescale=(1.0 / 255),
-                                  preprocessing_function=preprocess_input)
+test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
 
 train_generator = train_datagen.flow_from_directory(
