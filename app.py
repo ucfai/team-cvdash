@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import datetime
 import base64
 from io import BytesIO
@@ -7,7 +8,7 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-import model
+from cvdash.tasks import classification
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -99,7 +100,7 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
 
         string_b64 = str(list_of_contents[0])[23:]
         image = b64_to_np(string_b64)
-        model.main(image, 5)
+        classification.main(image, 5)
 
         return children
 
