@@ -1,16 +1,15 @@
 #!/usr/bin/env python
-import base64
 import datetime
-from io import BytesIO
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import numpy as np
 from dash.dependencies import Input, Output, State
-from PIL import Image
+from dash.exceptions import PreventUpdate
 
 from cvdash.tasks import classification
+from cvdash import utils
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -19,6 +18,18 @@ colors = {
 }
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+
+def parse_contents(contents):
+    return html.Div([
+        html.Img(src=contents,
+            style={
+                'max-width': '100%',
+                'max-height': '100%',
+                'align': 'middle'
+            }),
+    ])
+
 
 app.layout = html.Div(
     style={'backgroundColor': colors['background']},
@@ -53,13 +64,15 @@ app.layout = html.Div(
             'width': '45%',
             'display': 'inline-block',
             'margin': '1em'
-        }
+        },
+        children=[parse_contents(app.get_asset_url('cat.jpg'))]
     ),
     html.Div([dcc.Graph(
             id='bar_graph',
-            figure=# inital graph
-            )
-        ],
+            figure=classification.classification_plot(
+                utils.get_image(utils.example_image_link), 'xception') 
+        )
+    ],
         style={
             'width': '45%',
             'display': 'inline-block',
@@ -70,55 +83,25 @@ app.layout = html.Div(
 ])
 
 
-def parse_contents(contents):
-    return html.Div([
-        html.Img(src=contents,
-            style={
-                'max-width': '100%',
-                'max-height': '100%',
-                'align': 'middle'
-            }),
-    ])
-
-
 @app.callback([Output('output-image-upload', 'children'),
-            Output()],
-              [Input('upload-image', 'contents')])
-def update_output(list_of_contents, list_of_names, list_of_dates):
-    if list_of_contents is not None:
-        # children = [
-        #    parse_contents(c, n, d) for c, n, d in
-        #    zip(list_of_contents, list_of_names, list_of_dates)]
-        children = [parse_contents(item) for item in list_of_contents]
+            Output('bar_graph','figure')],
+              [Input('upload-image', 'contents')],
+              [State('output-image-upload', 'children'),
+              State('bar_graph', 'figure')]
+              )
+def update_output(*list_of_contents):
+    if None not in list_of_contents:
+        contents = list_of_contents[0][0]
+        children = parse_contents(contents)
 
-        string_b64 = str(list_of_contents[0])[23:]
-        image = b64_to_np(string_b64)
-        classification.main(image, 5)
-
-        return children
-
-
-def b64_to_np(string):
-    x = base64.b64decode(string)
-    decoded = BytesIO(x)
-
-    image = Image.open(decoded)
-
-    im = np.array(image, dtype=np.float32)
-
-    return im
-
-
-def np_to_b64(arr):
-    return base64.b64encode(arr)
-
-
-def b64_to_PIL(string):
-    x = base64.b64decode(string)
-    decoded = BytesIO(x)
-    image = Image.open(decoded)
-    return image
+        plot = classification.classification_plot(
+            utils.b64_to_PIL(contents[23:]), 'xception')
+        
+        return [children, plot]
+    else:
+        raise PreventUpdate
 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+    app.get_asset_url("/cvdash/assets")

@@ -9,19 +9,12 @@ import requests
 from PIL import Image
 from tensorflow.keras.applications import resnet_v2, vgg16, xception
 
+from .. import utils
+
 # module, model, input shape
 models = {"xception": (xception, xception.Xception(), (299, 299)),
           "vgg16": (vgg16, vgg16.VGG16(), (224, 224)),
           "resnet50": (resnet_v2, resnet_v2.ResNet50V2(), (224, 224))}
-
-
-def get_image(link):
-    """
-    Get image from link
-    """
-    r = requests.get(link)
-    r.raise_for_status()
-    return np.array(Image.open(BytesIO(r.content)))
 
 
 def make_plotly_plot(pred, model_name):
@@ -59,7 +52,7 @@ def classification_plot(img, model_name, top=5):
 
 
 if __name__ == "__main__":
-    img = get_image("https://upload.wikimedia.org/wikipedia/commons/6/66/"
+    img = utils.get_image("https://upload.wikimedia.org/wikipedia/commons/6/66/"
                     "An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg")
     fig = classification_plot(img, model_name="resnet50")
     fig.show()
