@@ -1,0 +1,13 @@
+REQUIREMENTS
+
+tensorflow.keras
+dash
+numpy
+cvdash
+PIL
+io
+cv2
+plotly
+requests
+datetime
+base64
