@@ -1,0 +1,7 @@
+tensorflow
+dash
+numpy
+PIL
+cv2
+plotly
+requests
