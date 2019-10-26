@@ -13,4 +13,5 @@ cvdash is a dashboard for computer vision related tasks.
 - Brent
 - Matthew
 - William
+- Alejandro
 - Faishal
