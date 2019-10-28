@@ -124,9 +124,9 @@ app.layout = html.Div(
 @app.callback(
     [Output("output-image-upload", "children"), Output("bar_graph", "figure")],
     [Input("upload-image", "contents"), Input("k-slider", "value")],
-    [State("output-image-upload", "children"), State("bar_graph", "figure")],
+    [State("output-image-upload", "children")],
 )
-def update_output(uploaded_image, k_val, state_img, state_bg):
+def update_output(uploaded_image, k_val, state_img):
     if uploaded_image is None and k_val == init_k_val:
         raise PreventUpdate
 
