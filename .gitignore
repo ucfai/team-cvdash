@@ -38,3 +38,4 @@ venv.bak/
 
 .vscode/
 data/
+.DS_Store
