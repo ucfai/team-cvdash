@@ -9,7 +9,7 @@ import requests
 from PIL import Image
 from tensorflow.keras.applications import resnet_v2, vgg16, xception
 
-from .. import utils
+from .. import utils 
 
 # module, model, input shape
 models = {"xception": (xception, xception.Xception(), (299, 299)),
@@ -22,9 +22,9 @@ def make_plotly_plot(pred, model_name):
     Make the plotly plot given the predictions and model name.
     """
     _, y, x = zip(*pred[::-1])
-
-    trace1 = go.Bar(x=x, y=y, orientation='h', text=x,
-                    textfont=dict(size=20), textposition='auto')
+    x=[round(i*100, 2) for i in x]
+    trace1 = go.Bar(x=x, y=y, orientation='h', text=[str(i) + '%' for i in x] ,
+            textfont=dict(size=20), textposition='auto')
     layout = go.Layout(title="Predictions from " + model_name, font=dict(size=24))
     fig = go.Figure(data=[trace1], layout=layout)
     return fig
@@ -52,6 +52,7 @@ def classification_plot(img, model_name, top=5):
 
 
 if __name__ == "__main__":
+
     img = utils.get_image("https://upload.wikimedia.org/wikipedia/commons/6/66/"
                     "An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg")
     fig = classification_plot(img, model_name="resnet50")
