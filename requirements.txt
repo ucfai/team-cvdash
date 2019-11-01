@@ -1,7 +1,7 @@
-tensorflow
 dash
 numpy
-PIL
-cv2
+opencv-python
+pillow
 plotly
 requests
+tensorflow
