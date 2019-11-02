@@ -11,17 +11,16 @@ from cvdash import utils
 from cvdash.tasks import classification
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
-
 colors = {"background": "343434"}
-
 assets_path = os.getcwd() + "/cvdash/assets"
 
 app = dash.Dash(
     __name__, external_stylesheets=external_stylesheets, assets_folder=assets_path
 )
 
-init_k_val = 5
-max_k_val = 20
+INIT_TOP_K = 5
+MIN_TOP_K = 3
+MAX_TOP_K = 20
 
 
 def parse_contents(contents):
@@ -68,11 +67,11 @@ app.layout = html.Div(
                     children=[
                         dcc.Slider(
                             id="k-slider",
-                            min=3,
-                            max=max_k_val,
+                            min=MIN_TOP_K,
+                            max=MAX_TOP_K,
                             step=1,
-                            value=init_k_val,
-                            marks={str(i): str(i) for i in range(3, max_k_val + 1)},
+                            value=INIT_TOP_K,
+                            marks={str(i): str(i) for i in range(3, MAX_TOP_K + 1)},
                         )
                     ],
                     style={
@@ -127,7 +126,7 @@ app.layout = html.Div(
     [State("output-image-upload", "children")],
 )
 def update_output(uploaded_image, k_val, state_img):
-    if uploaded_image is None and k_val == init_k_val:
+    if uploaded_image is None and k_val == INIT_TOP_K:
         raise PreventUpdate
 
     if uploaded_image is not None:
@@ -137,7 +136,7 @@ def update_output(uploaded_image, k_val, state_img):
         children = parse_contents(uploaded_image[0])
         return [children, plot]
 
-    if uploaded_image is None and k_val != init_k_val:
+    if uploaded_image is None and k_val != INIT_TOP_K:
         plot = classification.classification_plot(
             utils.get_image(utils.example_image_link), "xception", top=k_val
         )
