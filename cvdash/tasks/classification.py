@@ -24,9 +24,9 @@ def make_plotly_plot(pred, model_name):
     _, y, x = zip(*pred[::-1])
 
     trace1 = go.Bar(x=x, y=y, orientation='h', text=x,
-                    textfont=dict(size=24), textposition='auto')
-    layout = go.Layout(title="Predictions from " + model_name, font=dict(size=24),autosize=False,
-    width=800,
+                    textfont=dict(size=20), textposition='auto')
+    layout = go.Layout(title="Predictions from " + model_name, font=dict(size=20),autosize=False,
+    width=450,
     height=500+(len(x)*25))
     fig = go.Figure(data=[trace1], layout=layout)
     return fig
