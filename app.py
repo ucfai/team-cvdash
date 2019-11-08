@@ -107,6 +107,8 @@ app.layout = html.Div(
                                 {"label": "ResNet 50", "value": "resnet50"},
                             ],
                             value="xception",
+                            clearable=False,
+                            searchable=False
                         ),
                         dcc.Graph(
                             id="bar_graph",
