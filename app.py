@@ -5,7 +5,6 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
 
 from cvdash import utils
 from cvdash.tasks import classification
@@ -43,7 +42,7 @@ app.layout = html.Div(
             style={"textAlign": "center"},
         ),
         html.Div(
-            id="container",
+            id="major_container1",
             children=[
                 dcc.Upload(
                     id="upload-image",
@@ -85,7 +84,7 @@ app.layout = html.Div(
             style={"clear": "both"},
         ),
         html.Div(
-            id="container2",
+            id="major_container2",
             children=[
                 html.Div(
                     id="output-image-upload",
@@ -98,13 +97,25 @@ app.layout = html.Div(
                     children=[parse_contents(app.get_asset_url("cat.jpg"))],
                 ),
                 html.Div(
-                    [
+                    id="right_side_container",
+                    children=[
+                        dcc.Dropdown(
+                            id="model-dropdown",
+                            options=[
+                                {"label": "Xception", "value": "xception"},
+                                {"label": "VGG 16", "value": "vgg16"},
+                                {"label": "ResNet 50", "value": "resnet50"},
+                            ],
+                            value="xception",
+                            clearable=False,
+                            searchable=False
+                        ),
                         dcc.Graph(
                             id="bar_graph",
                             figure=classification.classification_plot(
                                 utils.get_image(utils.example_image_link), "xception"
                             ),
-                        )
+                        ),
                     ],
                     style={
                         "width": "45%",
@@ -122,23 +133,25 @@ app.layout = html.Div(
 
 @app.callback(
     [Output("output-image-upload", "children"), Output("bar_graph", "figure")],
-    [Input("upload-image", "contents"), Input("k-slider", "value")],
-    [State("output-image-upload", "children")],
+    [
+        Input("upload-image", "contents"),
+        Input("k-slider", "value"),
+        Input("model-dropdown", "value"),
+    ],
+    [State("output-image-upload", "children"), State("bar_graph", "figure")],
 )
-def update_output(uploaded_image, k_val, state_img):
-    if uploaded_image is None and k_val == INIT_TOP_K:
-        raise PreventUpdate
+def update_output(uploaded_image, k_val, dropdn_val, state_img, state_graph):
 
     if uploaded_image is not None:
         plot = classification.classification_plot(
-            utils.b64_to_PIL(uploaded_image[0][23:]), "xception", top=k_val
+            utils.b64_to_PIL(uploaded_image[0][23:]), dropdn_val, top=k_val
         )
         children = parse_contents(uploaded_image[0])
         return [children, plot]
 
-    if uploaded_image is None and k_val != INIT_TOP_K:
+    if uploaded_image is None:
         plot = classification.classification_plot(
-            utils.get_image(utils.example_image_link), "xception", top=k_val
+            utils.get_image(utils.example_image_link), dropdn_val, top=k_val
         )
         return [state_img, plot]
 
