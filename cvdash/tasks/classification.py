@@ -26,12 +26,17 @@ def make_plotly_plot(pred, model_name):
         orientation="h",
         text=[str(i) + "%" for i in x],
         textfont=dict(size=20),
+        textangle=0,
         textposition="auto",
     )
 
-    layout = go.Layout(title="Predictions from " + model_name, font=dict(size=20),autosize=False,
-    width=500,
-    height=500+(len(x)*25))
+    layout = go.Layout(
+        title="Predictions from " + model_name,
+        font=dict(size=20),
+        autosize=False,
+        width=500,
+        height=500 + (len(x) * 25),
+    )
     fig = go.Figure(data=[trace1], layout=layout)
 
     return fig
