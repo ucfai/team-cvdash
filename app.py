@@ -164,13 +164,18 @@ def update_output(uploaded_image, k_val, dropdn_val, n_clicks, state_img, state_
         try:
             np_array = utils.get_image(remote_url_image)
             print("after np_array")
-            np_array_pil = utils.b64_to_PIL(np_array)
+            np_array_pil = utils.np_to_PIL(np_array)
             print("after np_array_pil")
             plot = classification.classification_plot(
                 np_array_pil, dropdn_val, top=k_val
             )
             print("after plot")
-            children = parse_contents(np_to_b64(np_array))
+            print(utils.add_image_header(remote_url_image))
+            print()
+            print(utils.np_to_b64(np_array)[:50])
+            image = utils.add_image_header(remote_url_image) + utils.np_to_b64(np_array)
+            print("after adding image header")
+            children = parse_contents(image)
             print("after children")
             return [children, plot]
         except:

@@ -19,6 +19,10 @@ def get_image(link):
     r.raise_for_status()
     return np.array(Image.open(BytesIO(r.content)))
 
+def np_to_PIL(arr):
+    return Image.fromarray(arr)
+
+
 
 def np_to_b64(arr, altchars=None):
     if altchars:
@@ -31,3 +35,7 @@ def b64_to_PIL(string):
     decoded = BytesIO(x)
     image = Image.open(decoded)
     return image
+
+def add_image_header(string):
+    position = string[::-1].find('.',0,len(string))
+    return "data:image/" + string[-position:] + ";base64,"
