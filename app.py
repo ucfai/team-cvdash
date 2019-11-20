@@ -147,7 +147,7 @@ app.layout = html.Div(
 
 
 @app.callback(
-    [Output("output-image-upload", "children"), Output("bar_graph", "figure")],
+    [Output("output-image-upload", "children"), Output("bar_graph", "figure"), Output("remote-url-image", "value")],
     [
         Input("upload-image", "contents"),
         Input("k-slider", "value"),
@@ -158,50 +158,33 @@ app.layout = html.Div(
 )
 def update_output(uploaded_image, k_val, dropdn_val, n_clicks, state_img, state_graph, remote_url_image):
 
-    print(remote_url_image)
+    if uploaded_image is not None:
+        plot = classification.classification_plot(
+            utils.b64_to_PIL(uploaded_image.split(',')[1]), dropdn_val, top=k_val
+        )
+        children = parse_contents(uploaded_image)
+        return [children, plot, ""]
+
 
     if remote_url_image != '':
         try:
             np_array = utils.get_image(remote_url_image)
-            print("after np_array")
             np_array_pil = utils.np_to_PIL(np_array)
-            print("after np_array_pil")
             plot = classification.classification_plot(
                 np_array_pil, dropdn_val, top=k_val
             )
-            print("after plot")
-            print(utils.add_image_header(remote_url_image))
-            print()
-            print(utils.np_to_b64(np_array)[:50])
-            image = utils.add_image_header(remote_url_image) + utils.np_to_b64(np_array)
-            print("after adding image header")
+            image = utils.add_image_header2(remote_url_image)
             children = parse_contents(image)
-            print("after children")
-            return [children, plot]
+            return [children, plot, remote_url_image]
         except:
-            return [state_img, state_graph]
+            return [state_img, state_graph, ""]
 
-
-    if uploaded_image is not None:
-        plot = classification.classification_plot(
-            utils.b64_to_PIL(uploaded_image[0].split(',')[1]), dropdn_val, top=k_val
-        )
-        children = parse_contents(uploaded_image[0])
-        return [children, plot]
 
     if uploaded_image is None:
         plot = classification.classification_plot(
             utils.get_image(utils.example_image_link), dropdn_val, top=k_val
         )
-        return [state_img, plot]
-
-    # if uploaded_image is None and remote-url-image is None:
-    #     plot = classification.classification_plot(
-    #         utils.get_image(utils.example_image_link), dropdn_val, top=k_val
-    #     )
-    #     return [state_img, plot]
-
-
+        return [state_img, plot, ""]
 
 if __name__ == "__main__":
     app.run_server(debug=True)
