@@ -20,6 +20,7 @@ app = dash.Dash(
 INIT_TOP_K = 5
 MIN_TOP_K = 3
 MAX_TOP_K = 20
+my_url_image = "https://icatcare.org/app/uploads/2018/07/Thinking-of-getting-a-cat.png"
 
 
 def parse_contents(contents):
@@ -44,13 +45,28 @@ app.layout = html.Div(
         html.Div(
             id="major_container1",
             children=[
-                dcc.Upload(
-                    id="upload-image",
-                    children=[html.Div(["Drag and Drop or ", html.A("Select Files")])],
+                html.Div(
+                    [
+                        dcc.Upload(
+                            id="upload-image",
+                            children=[html.Div(["Drag and Drop or ", html.A("Select Files"), " or input url of remote image"],)],
+                        ),
+                        dcc.Input(
+                            id='remote-url-image', placeholder="Enter a URL to a remote image", type="text", value="",
+                            children=[html.Div(["Input url of remote image", ])],
+                            style={
+                                "width": "95%",
+                                "height": "40px",
+                                "borderWidth": "1px",
+                            },
+                            multiple=True,
+                        ),
+                        html.Button('Submit', id='button'),
+                    ],
                     style={
                         "align": "left",
                         "width": "45%",
-                        "height": "60px",
+                        "height": "180px",
                         "lineHeight": "60px",
                         "borderWidth": "1px",
                         "borderStyle": "dashed",
@@ -59,7 +75,6 @@ app.layout = html.Div(
                         "margin": "1em",
                         "float": "left",
                     },
-                    multiple=True,
                 ),
                 html.Div(
                     id="slider-div",
@@ -132,29 +147,44 @@ app.layout = html.Div(
 
 
 @app.callback(
-    [Output("output-image-upload", "children"), Output("bar_graph", "figure")],
+    [Output("output-image-upload", "children"), Output("bar_graph", "figure"), Output("remote-url-image", "value")],
     [
         Input("upload-image", "contents"),
         Input("k-slider", "value"),
         Input("model-dropdown", "value"),
+        Input("button", "n_clicks"),
     ],
-    [State("output-image-upload", "children"), State("bar_graph", "figure")],
+    [State("output-image-upload", "children"), State("bar_graph", "figure"), State("remote-url-image", "value")],
 )
-def update_output(uploaded_image, k_val, dropdn_val, state_img, state_graph):
+def update_output(uploaded_image, k_val, dropdn_val, n_clicks, state_img, state_graph, remote_url_image):
 
     if uploaded_image is not None:
         plot = classification.classification_plot(
-            utils.b64_to_PIL(uploaded_image[0][23:]), dropdn_val, top=k_val
+            utils.b64_to_PIL(uploaded_image.split(',')[1]), dropdn_val, top=k_val
         )
-        children = parse_contents(uploaded_image[0])
-        return [children, plot]
+        children = parse_contents(uploaded_image)
+        return [children, plot, ""]
+
+
+    if remote_url_image != '':
+        try:
+            np_array = utils.get_image(remote_url_image)
+            np_array_pil = utils.np_to_PIL(np_array)
+            plot = classification.classification_plot(
+                np_array_pil, dropdn_val, top=k_val
+            )
+            image = utils.add_image_header2(remote_url_image)
+            children = parse_contents(image)
+            return [children, plot, remote_url_image]
+        except:
+            return [state_img, state_graph, ""]
+
 
     if uploaded_image is None:
         plot = classification.classification_plot(
             utils.get_image(utils.example_image_link), dropdn_val, top=k_val
         )
-        return [state_img, plot]
-
+        return [state_img, plot, ""]
 
 if __name__ == "__main__":
     app.run_server(debug=True)
