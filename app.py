@@ -49,6 +49,7 @@ app.layout = html.Div(
                     [
                         dcc.Upload(
                             id="upload-image",
+                            accept="image/*" ,
                             children=[html.Div(["Drag and Drop or ", html.A("Select Files"), " or input url of remote image"],)],
                         ),
                         dcc.Input(
