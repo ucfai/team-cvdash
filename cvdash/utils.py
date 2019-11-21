@@ -24,9 +24,9 @@ def get_image(link):
     nparray = Image.open(bytes)
     return np.array(nparray)
 
+
 def np_to_PIL(arr):
     return Image.fromarray(arr)
-
 
 
 def np_to_b64(arr, altchars=None):
@@ -41,11 +41,19 @@ def b64_to_PIL(string):
     image = Image.open(decoded)
     return image
 
+
 def add_image_header(string):
-    position = string[::-1].find('.',0,len(string))
+    position = string[::-1].find(".", 0, len(string))
     return "data:image/" + string[-position:] + ";base64,"
+
 
 def add_image_header2(url):
     response = requests.get(url)
-    uri = ("data:" + response.headers['Content-Type'] + ";" + "base64," + base64.b64encode(response.content).decode("utf-8"))
+    uri = (
+        "data:"
+        + response.headers["Content-Type"]
+        + ";"
+        + "base64,"
+        + base64.b64encode(response.content).decode("utf-8")
+    )
     return uri

@@ -54,7 +54,7 @@ def classification_plot(img, model_name, top=5):
     img = np.array(img)
     img = cv2.resize(img, input_shape)
     img = module.preprocess_input(img)
-    img = img[:,:,:3]
+    img = img[:, :, :3]
 
     # Get and decode predictions
     pred = model.predict(np.expand_dims(img, 0))
