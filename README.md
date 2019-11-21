@@ -1,5 +1,7 @@
 # cvdash
 
+![screenshot](screenshots/example.png)
+
 cvdash is a dashboard for computer vision related tasks.
 
 ## Completed Tasks
