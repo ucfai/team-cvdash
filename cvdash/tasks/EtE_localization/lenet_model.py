@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torchvision import datasets, transforms
 
 
 class Net(nn.Module):
@@ -29,67 +30,55 @@ class Net(nn.Module):
         return x
     
 
-
+# https://pytorch.org/docs/stable/_modules/torchvision/datasets/svhn.html
 def load_data():
-    train_img = np.load('data/train_img.npy')
-    train_labels = np.load('data/train_labels.npy')
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,)),
+        ])
+    trainset = datasets.SVHN('data', split='train', download=True, transform=transform)
+    #trainset.labels = np.eye(10)[np.array([trainset.labels]).reshape(-1)]
+    #print(trainset[0])
 
-    test_img = np.load('data/test_img.npy')
-    test_labels = np.load('data/test_labels.npy')
+    testset = datasets.SVHN('data', split='test', download=True, transform=transform)
+    #testset.labels = np.eye(10)[np.array([testset.labels]).reshape(-1)]
 
-    s = np.arange(train_img.shape[0])
-    np.random.shuffle(s)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=True)
 
-    train_img = train_img[s]
-    train_labels = train_labels[s]
     
-
-    x_train = torch.from_numpy(train_img[:60000]/255)
-    indicies = torch.from_numpy(train_labels[:60000].reshape(1,-1)).long()-1
-    y_train = F.one_hot(indicies, 10)
-
-
-    x_val = torch.from_numpy(train_img[60000:]/255)
-    indicies = torch.from_numpy(train_labels[60000:].reshape(1,-1)).long()-1
-    y_val = F.one_hot(indicies, 10)
-
-    s = np.arange(test_img.shape[0])
-    np.random.shuffle(s)
-
-    x_test = torch.from_numpy(test_img[s]/255)
-    indicies = torch.from_numpy(test_labels[s].reshape(1,-1)).long()-1
-    y_test = F.one_hot(indicies, 10)
-
-    return x_train, y_train, x_val, y_val, x_test, y_test
-
+    return(trainloader, testloader)
 
 net = Net()
 print(net)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr = 0.001)
+optimizer = optim.SGD(net.parameters(), lr = 0.01)
 
-x_train, y_train, x_val, y_val, x_test, y_test = load_data()
-
+trainloader, testloader = load_data()
 
 for epoch in range(2):
     running_loss = 0.0
 
-    for i in range(6, len(x_train), 6):
+    for i, data in enumerate(trainloader, 0):
+        inputs, labels = data
+        if(i==0):
+            print(labels[0])
 
         # zero the parameter gradients
         optimizer.zero_grad()
 
         # forward + backwards + optimize
-        outputs = net(x_train[i-6:i])
-        loss = criterion(outputs, y_train)
+        outputs = net(inputs)
+        loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
 
         # print stats
         if i % 2000 == 1999:
+            print(inputs[0])
             print("[{},{} loss: {}".format(epoch+1, i+1, running_loss/2000))
-            running_loss = 0
+            running_loss = 0.0
 
 
 torch.save(net.state_dict(), './net.pth')
