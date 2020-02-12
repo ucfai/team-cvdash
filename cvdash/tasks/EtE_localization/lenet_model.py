@@ -5,6 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
+import torchvision
+import matplotlib.pyplot as plt
 
 
 class Net(nn.Module):
@@ -34,17 +36,15 @@ class Net(nn.Module):
 def load_data():
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,)),
+        transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5)),
         ])
     trainset = datasets.SVHN('data', split='train', download=True, transform=transform)
-    #trainset.labels = np.eye(10)[np.array([trainset.labels]).reshape(-1)]
-    #print(trainset[0])
 
     testset = datasets.SVHN('data', split='test', download=True, transform=transform)
-    #testset.labels = np.eye(10)[np.array([testset.labels]).reshape(-1)]
 
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=4, shuffle=True)
     testloader = torch.utils.data.DataLoader(testset, batch_size=4, shuffle=True)
+
 
     
     return(trainloader, testloader)
@@ -62,8 +62,6 @@ for epoch in range(2):
 
     for i, data in enumerate(trainloader, 0):
         inputs, labels = data
-        if(i==0):
-            print(labels[0])
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -74,11 +72,24 @@ for epoch in range(2):
         loss.backward()
         optimizer.step()
 
+        running_loss += loss.item()
         # print stats
         if i % 2000 == 1999:
-            print(inputs[0])
             print("[{},{} loss: {}".format(epoch+1, i+1, running_loss/2000))
             running_loss = 0.0
 
 
 torch.save(net.state_dict(), './net.pth')
+
+total = 0
+correct = 0
+with torch.no_grad():
+    for data in testloader:
+        images, labels = data
+        outputs = net(images)
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+
+print('Accuracy of the network on the 10000 test images: %d %%' % (
+    100 * correct / total))
