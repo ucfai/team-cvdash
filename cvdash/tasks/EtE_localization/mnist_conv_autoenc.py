@@ -6,37 +6,41 @@ import torch.nn.functional as F
 import torch.optim as optim
 from tqdm import tqdm
 from torchvision import datasets, transforms
+from torchsummary import summary
 
-BATCH_SIZE = 16
-EPOCHS = 10
+BATCH_SIZE = 8
+EPOCHS = 1 
 LR = 0.00005
+#LR = 0.00001
 
-no_tqdm = False
+no_tqdm = True
 
 
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.fc1 = nn.Linear(784, 500)
-        self.fc2 = nn.Linear(500, 200)
-        self.fc3 = nn.Linear(200, 10)
-        self.fc4 = nn.Linear(10, 2)
+        # in_channels, out_channels, kernel_size, stride
+        self.conv1 = nn.Conv2d(1, 16, 8)
+        self.conv2 = nn.Conv2d(16, 64, 8)
+        self.conv3 = nn.Conv2d(64, 128, 6, stride=2)
+        self.conv4 = nn.Conv2d(128, 256, 4)
 
-        self.fc5 = nn.Linear(2, 10)
-        self.fc6 = nn.Linear(10, 200)
-        self.fc7 = nn.Linear(200, 500)
-        self.fc8 = nn.Linear(500, 784)
+        self.deconv1 = nn.ConvTranspose2d(256, 128, 4)
+        self.deconv2 = nn.ConvTranspose2d(128, 64, 6, stride=2)
+        self.deconv3 = nn.ConvTranspose2d(64, 16, 8)
+        self.deconv4 = nn.ConvTranspose2d(16, 1, 8)
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = F.relu(self.fc5(x))
-        x = F.relu(self.fc6(x))
-        x = F.relu(self.fc7(x))
-        x = torch.sigmoid(self.fc8(x))
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+
+        x = F.relu(self.deconv1(x))
+        x = F.relu(self.deconv2(x))
+        x = F.relu(self.deconv3(x))
+        x = F.relu(self.deconv4(x))
 
         return x
 
@@ -69,6 +73,7 @@ if __name__ == "__main__":
 
     net = Net()
     print(net)
+    summary(net.cuda(), (1, 28, 28))
 
     net.to(device)
 
@@ -89,7 +94,7 @@ if __name__ == "__main__":
 
                 optimizer.zero_grad()
 
-                inputs = inputs.view(BATCH_SIZE, 784)
+                #inputs = inputs.view(BATCH_SIZE, 784)
                 outputs = net(inputs)
                 loss = criterion(outputs, inputs)
                 loss.backward()
@@ -100,8 +105,8 @@ if __name__ == "__main__":
                 if(i%100 == 0):
                     pbar.update(100)
 
-                if(i % 500 == 499 and no_tqdm):
-                    print("Epoch: {} | iteration: {} | loss avg: {}".format(epoch, i, running_loss/500))
+                if(i % 100 == 99 and no_tqdm):
+                    print("Epoch: {} | iteration: {} | loss avg: {}".format(epoch, i, running_loss/100))
                     running_loss = 0.0
   
             epoch_loss = "| Epoch {}, loss {} |".format(epoch, round(running_loss/total, 8))
@@ -110,4 +115,4 @@ if __name__ == "__main__":
     total_time = str(datetime.timedelta(seconds=round(end_time - start_time, 1)))
     print("\nModel took " + total_time + " (H:M:S).")
 
-    torch.save(net.state_dict(), "data/encoder_net.pth")
+    torch.save(net.state_dict(), "data/conv_encoder_net.pth")
