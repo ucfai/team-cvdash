@@ -1,5 +1,7 @@
 # cvdash
 
+This project is not being maintained currently. It may be revisited in the future.
+
 ![screenshot](screenshots/example.png)
 
 cvdash is a dashboard for computer vision related tasks.
